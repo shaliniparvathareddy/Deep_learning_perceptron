@@ -44,7 +44,7 @@ col = [
     "Entropy",
     "Class"
 ]
-data = pd.read_csv("/content/banknote+authentication.zip",header=None,names=col)
+data = pd.read_csv("/content/data_banknote_authentication.txt",header=None,names=col)
 
 print("First 5 samples:")
 print(data.head(5))
@@ -344,3 +344,136 @@ history = pd.DataFrame({
 
 history
 
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+def perceptron_train(X, y, learning_rate=1, epochs=10, gate_name="Gate"):
+    weights = np.zeros(X.shape[1])
+    bias = 0
+    update_no = 1
+    print("Training for", gate_name)
+    for epoch in range(epochs):
+        error_count = 0
+        for i in range(len(X)):
+            net = np.dot(X[i], weights) + bias
+            output = 1 if net >= 0 else 0
+            error = y[i] - output
+            if error != 0:
+                weights = weights + learning_rate * error * X[i]
+                bias = bias + learning_rate * error
+                print(f"\nUpdate {update_no}")
+                print("Input :", X[i])
+                print("Target:", y[i])
+                print("Weights:", weights)
+                print("Bias:", bias)
+                plot_boundary(X, y, weights, bias,
+                              gate_name,
+                              update_no)
+                update_no += 1
+                error_count += 1
+        if error_count == 0:
+            break
+    print("\nFinal Weights =", weights)
+    print("Final Bias =", bias)
+
+def plot_boundary(X, y, weights, bias, title, update):
+    plt.figure(figsize=(5,5))
+    for i in range(len(X)):
+        if y[i] == 0:
+            plt.scatter(X[i][0], X[i][1],
+                        color='red',
+                        s=120,
+                        marker='o',
+                        label='Class 0' if i==0 else "")
+        else:
+            plt.scatter(X[i][0], X[i][1],
+                        color='blue',
+                        s=120,
+                        marker='^',
+                        label='Class 1' if i==1 else "")
+
+    x = np.linspace(-1,2,100)
+    if weights[1] != 0:
+        y_line = -(weights[0]*x + bias)/weights[1]
+        plt.plot(x,y_line,'k')
+    plt.xlim(-0.5,1.5)
+    plt.ylim(-0.5,1.5)
+    plt.grid(True)
+    plt.title(f"{title} : Update {update}")
+    plt.xlabel("x1")
+    plt.ylabel("x2")
+    plt.legend()
+    plt.show()
+X_or = np.array([
+    [0,0],
+    [0,1],
+    [1,0],
+    [1,1]
+])
+y_or = np.array([0,1,1,1])
+perceptron_train(X_or,y_or,gate_name="OR Gate")
+X_and = np.array([
+    [0,0],
+    [0,1],
+    [1,0],
+    [1,1]
+])
+y_and = np.array([0,0,0,1])
+
+perceptron_train(X_and,y_and,gate_name="AND Gate")
+X_not = np.array([
+    [0],
+    [1]
+])
+
+y_not = np.array([1,0])
+def perceptron_not():
+
+    w = 0
+    b = 0
+
+    lr = 1
+    update = 1
+    print("Training NOT Gate")
+    for epoch in range(10):
+        error_count = 0
+        for i in range(len(X_not)):
+            net = X_not[i][0]*w + b
+            output = 1 if net>=0 else 0
+            error = y_not[i]-output
+            if error!=0:
+
+                w += lr*error*X_not[i][0]
+                b += lr*error
+
+                print("\nUpdate",update)
+                print("Weight =",w)
+                print("Bias =",b)
+
+                plt.figure(figsize=(5,2))
+
+                plt.scatter(X_not,y_not,s=100)
+
+                x=np.linspace(-1,2,100)
+
+                if w!=0:
+                    boundary=-b/w
+                    plt.axvline(boundary,color='red')
+
+                plt.title(f"NOT Gate Update {update}")
+                plt.grid()
+
+                plt.show()
+
+                update+=1
+                error_count+=1
+
+        if error_count==0:
+            break
+
+    print("\nFinal Weight =",w)
+    print("Final Bias =",b)
+
+
+perceptron_not()
